@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Jueves-De-Cierre</title>
+<style>
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+    font-family: sans-serif;
+    flex-direction: column;
+  }
+  .contenedor {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    aspect-ratio: 900 / 1125;
+    background: url("Closeout-thursday-plantilla.png") no-repeat center/contain;
+  }
+  #canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .controles {
+    margin-top: 25px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+  /* Botón personalizado */
+  input[type="file"] {
+    display: none; /* ocultamos el botón nativo */
+  }
+  label.custom-btn {
+    display: inline-block;
+    padding: 22px 32px;
+    background: #653a8e;
+    color: white;
+    border-radius: 18px;
+    font-size: 24px;
+    cursor: pointer;
+    text-align: center;
+    width: 220px; /* mismo ancho que el download */
+  }
+  button {
+    margin-left: 10px;
+    padding: 22px 32px;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    font-size: 24px;
+    background: #653a8e;
+    color: white;
+    width: 220px;
+  }
+</style>
+</head>
+<body>
+
+<div class="contenedor">
+  <canvas id="canvas" width="900" height="1125"></canvas>
+</div>
+
+<div class="controles">
+  <!-- Input escondido + label como botón -->
+  <input type="file" id="upload" accept="image/*">
+  <label for="upload" class="custom-btn">📂 Upload Photo</label>
+
+  <button id="download">⬇️ Download</button>
+</div>
+
+<script>
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const plantilla = new Image();
+  plantilla.src = "Closeout-thursday-plantilla.png";
+
+  const upload = document.getElementById("upload");
+  const download = document.getElementById("download");
+
+  let foto = null;
+
+  // dibuja plantilla base
+  plantilla.onload = () => {
+    ctx.drawImage(plantilla, 0, 0, canvas.width, canvas.height);
+  };
+
+  upload.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      foto = new Image();
+      foto.onload = () => {
+        dibujar();
+      };
+      foto.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function dibujar() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // plantilla fondo
+    ctx.drawImage(plantilla, 0, 0, canvas.width, canvas.height);
+
+    if (foto) {
+      const cx = 450;
+      const cy = 427.5;
+      const radio = 260;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, radio, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.clip();
+
+      const escala = (radio * 2) / foto.width;
+      const newW = foto.width * escala;
+      const newH = foto.height * escala;
+
+      const x = cx - newW / 2;
+      const y = cy - radio;
+
+      ctx.drawImage(foto, x, y, newW, newH);
+      ctx.restore();
+    }
+
+    ctx.drawImage(plantilla, 0, 0, canvas.width, canvas.height);
+  }
+
+  download.addEventListener("click", () => {
+    const link = document.createElement("a");
+    link.download = "Closeout-thursday-plantilla.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+</script>
+
+</body>
+</html>
